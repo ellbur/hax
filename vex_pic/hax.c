@@ -4,7 +4,10 @@
  */
 #include <p18cxxx.h>
 #include <usart.h>
+#include <adc.h>
+#include <delays.h>
 #include "hax.h"
+#include "pic/master.h"
 #include "pic/ifi_lib.h"
 
 /* Slow loop of 18.5 milliseconds (converted to microseconds). */
@@ -54,7 +57,7 @@ void setup_1(void) {
 	}
 	
 	/* Initialize Serial */
-	OpenUSART(USART_TX_INT_OFF &
+	Open1USART(USART_TX_INT_OFF &
 		USART_RX_INT_OFF &
 		USART_ASYNCH_MODE &
 		USART_EIGHT_BIT &
@@ -72,15 +75,17 @@ void setup_1(void) {
 	 */
 	if ( NUM_ANALOG_VALID(kNumAnalogInputs) && kNumAnalogInputs > 0 ) {
 		/* ADC_FOSC: Based on a baud_115 value of 21, given the formula
-		 * FOSC/(16(X + 1)) in table 18-1 of the PIC18F8520 doc, the FOSC
+		 * FOSC/(16(X + 1)) in table 18-1 of the PIC18F8520 doc the FOSC
 		 * is 40Mhz.
-		 * According to the doc, section 19.2, the
+		 * Also according to the doc, section 19.2, the
 		 * ADC Freq needs to be at least 1.6us or 0.625MHz. 40/0.625=64
 		 * (Also, see table 19-1 in the chip doc)
 		 */
 		OpenADC( 
-			ADC_FOSC_64 & ADC_RIGHT_JUST & ( 0xF0 | (16 - kNumAnalogInputs) ) ,
-			ADC_CH0 & ADC_INT_OFF & ADC_VREFPLUS_VDD & ADC_VREFMINUS_VSS 
+			ADC_FOSC_64 & ADC_RIGHT_JUST &
+		       		( 0xF0 | (16 - kNumAnalogInputs) ) ,
+			ADC_CH0 & ADC_INT_OFF & ADC_VREFPLUS_VDD &
+		       		ADC_VREFMINUS_VSS 
 			);
 	}
 }
@@ -94,11 +99,11 @@ void spin(void) {
 }
 
 void loop_1(void) {
-	GetData(&rxdata);
+	Getdata(&rxdata);
 }
 
 void loop_2(void) {
-	PutData(&txdata);
+	Putdata(&txdata);
 }
 
 Bool new_data_received(void) {
